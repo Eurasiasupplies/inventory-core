@@ -1,0 +1,8 @@
+{
+  "name": "bappy/inventory-core",
+  "autoload": {
+    "psr-4": {
+      "InventoryCore\\": "src/"
+    }
+  }
+}
