@@ -1,8 +1,15 @@
 {
-  "name": "bappy/inventory-core",
+  "name": "eurasiasupplies/inventory-core",
   "autoload": {
     "psr-4": {
       "InventoryCore\\": "src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "InventoryCore\\InventoryServiceProvider"
+      ]
     }
   }
 }
