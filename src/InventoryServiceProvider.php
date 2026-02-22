@@ -4,7 +4,9 @@ namespace InventoryCore;
 
 use Illuminate\Support\ServiceProvider;
 use InventoryCore\Contracts\InventoryInterface;
+use InventoryCore\Contracts\TransferInterface;
 use InventoryCore\Services\InventoryService;
+use InventoryCore\Services\TransferService;
 
 class InventoryServiceProvider extends ServiceProvider
 {
@@ -12,7 +14,9 @@ class InventoryServiceProvider extends ServiceProvider
     {
         $this->app->bind(
             InventoryInterface::class,
-            InventoryService::class
+            InventoryService::class,
+            TransferInterface::class,
+            TransferService::class
         );
     }
 }
