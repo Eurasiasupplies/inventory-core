@@ -4,10 +4,21 @@ namespace InventoryCore\Services;
 
 use Illuminate\Support\Facades\DB;
 use InventoryCore\Contracts\InventoryInterface;
+use InventoryCore\Contracts\TransferInterface;
+use InventoryCore\Contracts\StockHistoryInterface;
 use InventoryCore\Exceptions\InsufficientStockException;
 
 class InventoryService implements InventoryInterface
 {
+    protected TransferInterface $transfer;
+    protected StockHistoryInterface $stockHistory;
+
+    public function __construct(TransferInterface $transfer, StockHistoryInterface $stockHistory)
+    {
+        $this->transfer = $transfer;
+        $this->stockHistory = $stockHistory;
+    }
+
     public function available(int $productId, int $warehouseId): int
     {
         return (int) DB::table('product_prices')
@@ -61,35 +72,38 @@ class InventoryService implements InventoryInterface
     public function decreaseWithPriority(
         int $productId,
         int $quantity,
-        ?int $orderId = null
+        ?int $orderId = null,
     ): bool {
 
         return DB::transaction(function () use (
             $productId,
             $quantity,
-            $orderId
+            $orderId,
         ) {
-
             $remaining = $quantity;
-
             $stocks = DB::table('product_prices as ps')
                 ->join('warehouses as w', 'w.id', '=', 'ps.warehouse_id')
-                ->where('ws.product_id', $productId)
-                ->where('ws.quantity', '>', 0)
+                ->where('ps.product_id', $productId)
+                ->where('ps.quantity', '>', 0)
                 ->orderBy('w.priority', 'asc')
-                ->select('ws.*', 'w.priority')
+                ->select('ps.*', 'w.priority')
                 ->lockForUpdate()
                 ->get();
+            //dd($productId, $quantity, $stocks);
 
             if ($stocks->sum('quantity') < $quantity) {
                 throw new InsufficientStockException();
             }
 
             foreach ($stocks as $stock) {
-
                 if ($remaining <= 0) break;
 
                 $deduct = min($stock->quantity, $remaining);
+
+                if($stock->warehouse_id != 1) {
+                    $transferId = $this->transfer->storeTransfer($productId, $stock->warehouse_id, $deduct);
+                    $this->stockHistory->storeTransferHistory($productId, $stock->warehouse_id, $deduct, $stock->quantity);
+                }
 
                 DB::table('product_prices')
                     ->where('id', $stock->id)

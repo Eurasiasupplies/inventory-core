@@ -8,29 +8,35 @@ use InventoryCore\Exceptions\InsufficientStockException;
 
 class TransferService implements TransferInterface
 {
-    public function storeTransfer(int $productId, int $warehouseId, int $quantity): int
+    public function storeTransfer(int $productId, int $warehouseId, int $quantity)
     {
         $transferData = [
-            'product_id' => $productId,
-            'warehouse_id' => 1,
-            'to_warehouse_id' => $warehouseId,
+            'date' => now(),
+            'warehouse_id' => $warehouseId,
+            'to_warehouse_id' => 1,
             'quantity' => $quantity,
             'transfer_status' => 2,
             'action' => 'complete',
-            'online_transfer' => 1
+            'online_transfer' => 1,
+            'created_at'      => now(),
+            'updated_at'      => now(),
         ];
 
-        $transfer = DB::table('transfers')->create($transferData);
+        $transfer =  DB::table('transfers')->insertGetId($transferData);
 
         $transferItemData = [
-            'transfer_id' => $transfer->id,
+            'transfer_id' => $transfer,
             'product_id' => $productId,
-            'warehouse_id' => 1,
-            'to_warehouse_id' => $warehouseId,
+            'warehouse_id' => $warehouseId,
+            'to_warehouse_id' => 1,
             'unit_quantity' => $quantity,
+            'created_at'    => now(),
+            'updated_at'    => now(),
         ];
 
-        return DB::table('transfer_items')->create($transferItemData);
+        DB::table('transfer_items')->insert($transferItemData);
+
+        return $transfer;
     }
 
     public function totalAvailable(int $productId): int
