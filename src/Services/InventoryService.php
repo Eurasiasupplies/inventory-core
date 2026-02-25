@@ -89,7 +89,7 @@ class InventoryService implements InventoryInterface
                 ->select('ps.*', 'w.priority')
                 ->lockForUpdate()
                 ->get();
-            //dd($productId, $quantity, $stocks);
+
 
             if ($stocks->sum('quantity') < $quantity) {
                 throw new InsufficientStockException();
@@ -101,15 +101,26 @@ class InventoryService implements InventoryInterface
                 $deduct = min($stock->quantity, $remaining);
 
                 if($stock->warehouse_id != 1) {
-                    $transferId = $this->transfer->storeTransfer($productId, $stock->warehouse_id, $deduct);
-                    $this->stockHistory->storeTransferHistory($productId, $stock->warehouse_id, $deduct, $stock->quantity);
-                }
+                    $onlineQuantity = DB::table('product_prices')
+                        ->where('product_id', $productId)
+                        ->where('warehouse_id', 1)
+                        ->value('quantity') ?? 0;
 
-                DB::table('product_prices')
-                    ->where('id', $stock->id)
-                    ->update([
-                        'quantity' => DB::raw("quantity - {$deduct}")
-                    ]);
+                    $transferId = $this->transfer->storeTransfer($productId, $stock->warehouse_id, $deduct);
+                    $this->stockHistory->storeTransferHistory($productId, $stock->warehouse_id, $deduct, $stock->quantity, $onlineQuantity);
+
+                    DB::table('product_prices')
+                        ->where('id', $stock->id)
+                        ->update([
+                            'quantity' => DB::raw("quantity - {$deduct}")
+                        ]);
+
+                    DB::table('product_prices')
+                        ->where('warehouse_id', 1)
+                        ->update([
+                            'quantity' => DB::raw("quantity + {$deduct}")
+                        ]);
+                }
 
                 $remaining -= $deduct;
             }
