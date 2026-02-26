@@ -18,7 +18,7 @@ class StockHistoryService implements StockHistoryInterface
             ->where('product_prices.warehouse_id', $warehouseId)
             ->select(
                 'products.*',
-                'product_prices.quantity',
+                'product_prices.quantity'
             )
             ->first();
 
@@ -28,7 +28,7 @@ class StockHistoryService implements StockHistoryInterface
             ->where('product_prices.warehouse_id', 1)
             ->select(
                 'products.*',
-                'product_prices.quantity',
+                'product_prices.quantity'
             )
             ->first();
 
@@ -87,23 +87,23 @@ class StockHistoryService implements StockHistoryInterface
     }
 
 
-    public function storeStockHistory(int $productId, int $warehouseId, int $quantity, int $oldQuantity)
+    public function storeOnlineHistory(int $productId, int $quantity, int $oldQuantity)
     {
         $productInfo = DB::table('products')
             ->join('product_prices', 'products.id', '=', 'product_prices.product_id')
             ->where('products.id', $productId)
-            ->where('product_prices.warehouse_id', $warehouseId)
+            ->where('product_prices.warehouse_id', 1)
             ->select(
                 'products.*',
-                'product_prices.quantity',
+                'product_prices.quantity'
             )
             ->first();
 
         $data = [
             'product_id' => $productId,
             'sku' => $productInfo->sku,
-            'warehouse_id' => $warehouseId,
-            'old_quantity'      => $oldQuantity ?? 0,
+            'warehouse_id' => 1,
+            'old_quantity'      => $oldQuantity,
             'current_quantity'  => $productInfo->quantity,
             'change_quantity'   => $quantity,
             'cost_price'        => $productInfo->cost_price,

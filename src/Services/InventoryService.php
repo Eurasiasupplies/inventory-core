@@ -95,6 +95,7 @@ class InventoryService implements InventoryInterface
                 throw new InsufficientStockException();
             }
 
+            $totalQuantity = 0;
             foreach ($stocks as $stock) {
                 if ($remaining <= 0) break;
 
@@ -124,6 +125,19 @@ class InventoryService implements InventoryInterface
 
                 $remaining -= $deduct;
             }
+
+            $oldQuantity = DB::table('product_prices')
+                ->where('product_id', $productId)
+                ->where('warehouse_id', 1)
+                ->value('quantity') ?? 0;
+
+            DB::table('product_prices')
+                ->where('warehouse_id', 1)
+                ->update([
+                    'quantity' => DB::raw("quantity - {$quantity}")
+                ]);
+
+            $this->stockHistory->storeOnlineHistory($productId, $quantity, $oldQuantity);
 
             return true;
         });
