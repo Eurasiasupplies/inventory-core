@@ -72,13 +72,13 @@ class InventoryService implements InventoryInterface
     public function decreaseWithPriority(
         int $productId,
         int $quantity,
-        ?int $orderId = null,
+        ?int $orderId = null
     ): bool {
 
         return DB::transaction(function () use (
             $productId,
             $quantity,
-            $orderId,
+            $orderId
         ) {
             $remaining = $quantity;
             $stocks = DB::table('product_prices as ps')
@@ -133,6 +133,7 @@ class InventoryService implements InventoryInterface
 
             DB::table('product_prices')
                 ->where('warehouse_id', 1)
+                ->where('product_id', $productId)
                 ->update([
                     'quantity' => DB::raw("quantity - {$quantity}")
                 ]);
