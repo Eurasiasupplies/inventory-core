@@ -6,17 +6,20 @@ use Illuminate\Support\Facades\DB;
 use InventoryCore\Contracts\InventoryInterface;
 use InventoryCore\Contracts\TransferInterface;
 use InventoryCore\Contracts\StockHistoryInterface;
+use InventoryCore\Contracts\StockEventInterface;
 use InventoryCore\Exceptions\InsufficientStockException;
 
 class InventoryService implements InventoryInterface
 {
     protected TransferInterface $transfer;
     protected StockHistoryInterface $stockHistory;
+    protected StockEventInterface $stockEventService;
 
-    public function __construct(TransferInterface $transfer, StockHistoryInterface $stockHistory)
+    public function __construct(TransferInterface $transfer, StockHistoryInterface $stockHistory, StockEventInterface $stockEventService)
     {
         $this->transfer = $transfer;
         $this->stockHistory = $stockHistory;
+        $this->stockEventService = $stockEventService;
     }
 
     public function available(int $productId, int $warehouseId): int
@@ -139,6 +142,7 @@ class InventoryService implements InventoryInterface
                 ]);
 
             $this->stockHistory->storeOnlineHistory($productId, $quantity, $oldQuantity);
+            $this->stockEventService->publish($productId, $quantity, $oldQuantity);
 
             return true;
         });
