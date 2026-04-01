@@ -5,9 +5,11 @@ namespace InventoryCore;
 
 use Illuminate\Support\ServiceProvider;
 use InventoryCore\Contracts\InventoryInterface;
+use InventoryCore\Contracts\StockEventInterface;
 use InventoryCore\Contracts\StockHistoryInterface;
 use InventoryCore\Contracts\TransferInterface;
 use InventoryCore\Services\InventoryService;
+use InventoryCore\Services\StockEventService;
 use InventoryCore\Services\TransferService;
 use InventoryCore\Services\StockHistoryService;
 
@@ -28,6 +30,11 @@ class InventoryServiceProvider extends ServiceProvider
         $this->app->bind(
             StockHistoryInterface::class,
             StockHistoryService::class
+        );
+
+        $this->app->bind(
+            StockEventInterface::class,
+            StockEventService::class
         );
     }
 }

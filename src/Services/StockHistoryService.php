@@ -3,14 +3,11 @@
 namespace InventoryCore\Services;
 
 use Illuminate\Support\Facades\DB;
-use InventoryCore\Contracts\InventoryInterface;
 use InventoryCore\Contracts\StockHistoryInterface;
-use InventoryCore\Contracts\TransferInterface;
-use InventoryCore\Exceptions\InsufficientStockException;
 
 class StockHistoryService implements StockHistoryInterface
 {
-    public function storeTransferHistory(int $productId, int $warehouseId, int $quantity, int $oldQuantity, int $onlineQuantity)
+    public function storeTransferHistory(int $referenceId, int $productId, int $warehouseId, int $quantity, int $oldQuantity, int $onlineQuantity)
     {
         $productInfo = DB::table('products')
             ->join('product_prices', 'products.id', '=', 'product_prices.product_id')
@@ -33,6 +30,7 @@ class StockHistoryService implements StockHistoryInterface
             ->first();
 
         $data = [
+            'reference_id' => $referenceId,
             'product_id' => $productId,
             'sku' => $productInfo->sku,
             'warehouse_id' => $warehouseId,
@@ -68,7 +66,7 @@ class StockHistoryService implements StockHistoryInterface
         }
 
         return DB::table('stock_histories')->insert([
-            'reference_id'      => 22 ?? null,
+            'reference_id'      => $data['reference_id'] ?? null,
             'reference_type'    => $type ?? null,
             'sku'               => $data['sku'],
             'product_id'        => $data['product_id'],
@@ -87,7 +85,7 @@ class StockHistoryService implements StockHistoryInterface
     }
 
 
-    public function storeOnlineHistory(int $productId, int $quantity, int $oldQuantity)
+    public function storeOnlineHistory(int $referenceId, int $productId, int $quantity, int $oldQuantity)
     {
         $productInfo = DB::table('products')
             ->join('product_prices', 'products.id', '=', 'product_prices.product_id')
@@ -100,6 +98,7 @@ class StockHistoryService implements StockHistoryInterface
             ->first();
 
         $data = [
+            'reference_id' => $referenceId,
             'product_id' => $productId,
             'sku' => $productInfo->sku,
             'warehouse_id' => 1,

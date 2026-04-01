@@ -6,17 +6,20 @@ use Illuminate\Support\Facades\DB;
 use InventoryCore\Contracts\InventoryInterface;
 use InventoryCore\Contracts\TransferInterface;
 use InventoryCore\Contracts\StockHistoryInterface;
+use InventoryCore\Contracts\StockEventInterface;
 use InventoryCore\Exceptions\InsufficientStockException;
 
 class InventoryService implements InventoryInterface
 {
     protected TransferInterface $transfer;
     protected StockHistoryInterface $stockHistory;
+    protected StockEventInterface $stockEventService;
 
-    public function __construct(TransferInterface $transfer, StockHistoryInterface $stockHistory)
+    public function __construct(TransferInterface $transfer, StockHistoryInterface $stockHistory, StockEventInterface $stockEventService)
     {
         $this->transfer = $transfer;
         $this->stockHistory = $stockHistory;
+        $this->stockEventService = $stockEventService;
     }
 
     public function available(int $productId, int $warehouseId): int
@@ -35,17 +38,17 @@ class InventoryService implements InventoryInterface
     }
 
     public function increase(
+        int $referenceId,
         int $productId,
         int $warehouseId,
-        int $quantity,
-        ?int $orderId = null
+        int $quantity
     ): bool {
 
         return DB::transaction(function () use (
+            $referenceId,
             $productId,
             $warehouseId,
-            $quantity,
-            $orderId
+            $quantity
         ) {
 
             $stock = DB::table('product_prices')
@@ -70,15 +73,15 @@ class InventoryService implements InventoryInterface
     }
 
     public function decreaseWithPriority(
+        int $referenceId,
         int $productId,
-        int $quantity,
-        ?int $orderId = null
+        int $quantity
     ): bool {
 
         return DB::transaction(function () use (
+            $referenceId,
             $productId,
-            $quantity,
-            $orderId
+            $quantity
         ) {
             $remaining = $quantity;
             $stocks = DB::table('product_prices as ps')
@@ -108,7 +111,7 @@ class InventoryService implements InventoryInterface
                         ->value('quantity') ?? 0;
 
                     $transferId = $this->transfer->storeTransfer($productId, $stock->warehouse_id, $deduct);
-                    $this->stockHistory->storeTransferHistory($productId, $stock->warehouse_id, $deduct, $stock->quantity, $onlineQuantity);
+                    $this->stockHistory->storeTransferHistory($transferId, $productId, $stock->warehouse_id, $deduct, $stock->quantity, $onlineQuantity);
 
                     DB::table('product_prices')
                         ->where('id', $stock->id)
@@ -139,7 +142,8 @@ class InventoryService implements InventoryInterface
                     'quantity' => DB::raw("quantity - {$quantity}")
                 ]);
 
-            $this->stockHistory->storeOnlineHistory($productId, $quantity, $oldQuantity);
+            $this->stockHistory->storeOnlineHistory($referenceId, $productId, $quantity, $oldQuantity);
+            $this->stockEventService->publish($productId, $quantity, $oldQuantity);
 
             return true;
         });
