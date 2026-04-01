@@ -121,6 +121,7 @@ class InventoryService implements InventoryInterface
 
                     DB::table('product_prices')
                         ->where('warehouse_id', 1)
+                        ->where('product_id', $stock->product_id)
                         ->update([
                             'quantity' => DB::raw("quantity + {$deduct}")
                         ]);
