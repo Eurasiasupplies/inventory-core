@@ -18,6 +18,8 @@ class TransferService implements TransferInterface
             'transfer_status' => 2,
             'action' => 'complete',
             'online_transfer' => 1,
+            'created_by' => 58,
+            'updated_by' => 58,
             'created_at' => now(),
             'updated_at' => now(),
         ];
