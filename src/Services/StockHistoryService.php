@@ -54,7 +54,7 @@ class StockHistoryService implements StockHistoryInterface
             ->where('product_prices.warehouse_id', 1)
             ->select(
                 'products.*',
-                'product_prices.quantity',
+                'product_prices.quantity'
             )
             ->first();
 
