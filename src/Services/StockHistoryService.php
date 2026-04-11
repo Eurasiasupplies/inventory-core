@@ -71,7 +71,7 @@ class StockHistoryService implements StockHistoryInterface
             'sku'               => $data['sku'],
             'product_id'        => $data['product_id'],
             'warehouse_id'      => $data['warehouse_id'],
-            'user_id'           => $data['user_id'] ?? 40,
+            'user_id'           => $data['user_id'] ?? 58,
             'action'            => $action,
             'old_quantity'      => $data['old_quantity'] ?? 0,
             'current_quantity'  => $data['current_quantity'] ?? 0,
