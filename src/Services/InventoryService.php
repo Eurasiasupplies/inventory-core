@@ -159,7 +159,7 @@ class InventoryService implements InventoryInterface
                 "supplier" => 'AzanWholeSale',
                 "name" => $productInfo->name ?? '',
                 "wholesale_price" => $productInfo->wholesale_price ?? '',
-                "stock" => $quantity ?? '',
+                "stock" => $currentTotalQty ?? '',
             ];
 
             $currentTotalQty = $totalOldQuantity - $quantity;
