@@ -3,6 +3,7 @@
 namespace InventoryCore\Services;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use InventoryCore\Contracts\InventoryInterface;
 use InventoryCore\Contracts\TransferInterface;
 use InventoryCore\Contracts\StockHistoryInterface;
@@ -144,6 +145,13 @@ class InventoryService implements InventoryInterface
 
             $this->stockHistory->storeOnlineHistory($referenceId, $productId, $quantity, $oldQuantity);
             $this->stockEventService->publish($productId, $quantity, $oldQuantity);
+
+            $currentQty = $oldQuantity - $quantity;
+            if($currentQty <= 5) {
+                Log::info('Test Order to send Notification', ['referenceId' => $referenceId, 'productId' => $productId, 'quantity' => $quantity, 'oldQuantity' => $oldQuantity]);
+                $this->stockEventService->publish($productId, $quantity, $oldQuantity);
+            }
+            Log::info('Test Order', ['referenceId' => $referenceId, 'productId' => $productId, 'quantity' => $quantity, 'oldQuantity' => $oldQuantity]);
 
             return true;
         });
