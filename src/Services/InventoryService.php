@@ -153,6 +153,7 @@ class InventoryService implements InventoryInterface
                 ->where('p.id', $productId)
                 ->first();
 
+            $currentTotalQty = $totalOldQuantity - $quantity;
             $data = [
                 "product_id" => $productId,
                 "sku" => $productInfo->sku ?? '',
@@ -162,7 +163,6 @@ class InventoryService implements InventoryInterface
                 "stock" => $currentTotalQty ?? '',
             ];
 
-            $currentTotalQty = $totalOldQuantity - $quantity;
             if ($currentTotalQty <= 5) {
                 Log::info('Test Order to send Notification', ['referenceId' => $referenceId, 'productId' => $productId, 'quantity' => $currentTotalQty, 'oldQuantity' => $totalOldQuantity]);
                 $this->stockEventService->publish($data);
