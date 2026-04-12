@@ -136,6 +136,10 @@ class InventoryService implements InventoryInterface
                 ->where('warehouse_id', 1)
                 ->value('quantity') ?? 0;
 
+            $totalOldQuantity = DB::table('product_prices')
+                ->where('product_id', $productId)
+                ->sum('quantity');
+
             DB::table('product_prices')
                 ->where('warehouse_id', 1)
                 ->where('product_id', $productId)
@@ -146,12 +150,12 @@ class InventoryService implements InventoryInterface
             $this->stockHistory->storeOnlineHistory($referenceId, $productId, $quantity, $oldQuantity);
             $this->stockEventService->publish($productId, $quantity, $oldQuantity);
 
-            $currentQty = $oldQuantity - $quantity;
-            if($currentQty <= 5) {
-                Log::info('Test Order to send Notification', ['referenceId' => $referenceId, 'productId' => $productId, 'quantity' => $quantity, 'oldQuantity' => $oldQuantity]);
+            $currentTotalQty = $totalQuantity - $quantity;
+            if ($currentTotalQty <= 5) {
+                Log::info('Test Order to send Notification', ['referenceId' => $referenceId, 'productId' => $productId, 'quantity' => $currentTotalQty, 'oldQuantity' => $totalOldQuantity]);
                 $this->stockEventService->publish($productId, $quantity, $oldQuantity);
             }
-            Log::info('Test Order', ['referenceId' => $referenceId, 'productId' => $productId, 'quantity' => $quantity, 'oldQuantity' => $oldQuantity]);
+            Log::info('Test Order', ['referenceId' => $referenceId, 'productId' => $productId, 'quantity' => $currentTotalQty, 'oldQuantity' => $totalOldQuantity]);
 
             return true;
         });
