@@ -9,13 +9,8 @@ use Illuminate\Support\Facades\Redis;
 
 class StockEventService implements StockEventInterface
 {
-    public function publish($productId, $oldQty, $newQty)
+    public function publish(array $data)
     {
-        Redis::publish('stock-updates', json_encode([
-            'product_id'   => $productId,
-            'old_quantity' => $oldQty,
-            'new_quantity' => $newQty,
-            'time'         => now()
-        ]));
+        Redis::publish('stock-updates', json_encode($data));
     }
 }

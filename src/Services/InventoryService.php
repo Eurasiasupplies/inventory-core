@@ -148,12 +148,24 @@ class InventoryService implements InventoryInterface
                 ]);
 
             $this->stockHistory->storeOnlineHistory($referenceId, $productId, $quantity, $oldQuantity);
-            $this->stockEventService->publish($productId, $quantity, $oldQuantity);
+
+            $productInfo = DB::table('products as p')
+                ->where('p.id', $productId)
+                ->first();
+
+            $data = [
+                "product_id" => $productId,
+                "sku" => $productInfo->sku ?? '',
+                "supplier" => 'AzanWholeSale',
+                "name" => $productInfo->name ?? '',
+                "wholesale_price" => $productInfo->wholesale_price ?? '',
+                "stock" => $quantity ?? '',
+            ];
 
             $currentTotalQty = $totalOldQuantity - $quantity;
             if ($currentTotalQty <= 5) {
                 Log::info('Test Order to send Notification', ['referenceId' => $referenceId, 'productId' => $productId, 'quantity' => $currentTotalQty, 'oldQuantity' => $totalOldQuantity]);
-                $this->stockEventService->publish($productId, $oldQuantity, $currentTotalQty);
+                $this->stockEventService->publish($data);
             }
             Log::info('Test Order', ['referenceId' => $referenceId, 'productId' => $productId, 'quantity' => $currentTotalQty, 'oldQuantity' => $totalOldQuantity]);
 
