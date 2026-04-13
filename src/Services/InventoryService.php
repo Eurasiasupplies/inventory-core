@@ -154,18 +154,18 @@ class InventoryService implements InventoryInterface
                 ->first();
 
             $currentTotalQty = $totalOldQuantity - $quantity;
-            $data = [
-                "product_id" => $productId,
-                "sku" => $productInfo->sku ?? '',
-                "supplier" => 'AzanWholeSale',
-                "name" => $productInfo->name ?? '',
-                "wholesale_price" => $productInfo->wholesale_price ?? '',
-                "stock" => $currentTotalQty ?? '',
-            ];
 
             if ($currentTotalQty <= 5) {
+                DB::table('stock_notifications')->insert([
+                    'product_id' => $productId,
+                    'sku' => $productInfo->sku,
+                    "name" => $productInfo->name ?? '',
+                    'price' => $productInfo->wholesale_price,
+                    'old_quantity' => $totalOldQuantity,
+                    'stock_quantity' => $currentTotalQty,
+                    'created_at' => now(),
+                ]);
                 Log::info('Test Order to send Notification', ['referenceId' => $referenceId, 'productId' => $productId, 'quantity' => $currentTotalQty, 'oldQuantity' => $totalOldQuantity]);
-                $this->stockEventService->publish($data);
             }
             Log::info('Test Order', ['referenceId' => $referenceId, 'productId' => $productId, 'quantity' => $currentTotalQty, 'oldQuantity' => $totalOldQuantity]);
 
