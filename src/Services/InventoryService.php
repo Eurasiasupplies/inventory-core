@@ -111,8 +111,8 @@ class InventoryService implements InventoryInterface
                         ->where('warehouse_id', 1)
                         ->value('quantity') ?? 0;
 
-                    $transferId = $this->transfer->storeTransfer($productId, $stock->warehouse_id, $deduct);
-                    $this->stockHistory->storeTransferHistory($transferId, $productId, $stock->warehouse_id, $deduct, $stock->quantity, $onlineQuantity);
+                    $transferId = $this->transfer->storeTransfer($referenceId, $productId, $stock->warehouse_id, $deduct);
+                    $this->stockHistory->storeTransferHistory($transferId, $referenceId, $productId, $stock->warehouse_id, $deduct, $stock->quantity, $onlineQuantity);
 
                     DB::table('product_prices')
                         ->where('id', $stock->id)

@@ -7,7 +7,7 @@ use InventoryCore\Contracts\StockHistoryInterface;
 
 class StockHistoryService implements StockHistoryInterface
 {
-    public function storeTransferHistory(int $referenceId, int $productId, int $warehouseId, int $quantity, int $oldQuantity, int $onlineQuantity)
+    public function storeTransferHistory(int $referenceId, int $orderId, int $productId, int $warehouseId, int $quantity, int $oldQuantity, int $onlineQuantity)
     {
         $productInfo = DB::table('products')
             ->join('product_prices', 'products.id', '=', 'product_prices.product_id')
@@ -31,6 +31,7 @@ class StockHistoryService implements StockHistoryInterface
 
         $data = [
             'reference_id' => $referenceId,
+            'order_id' => $orderId,
             'product_id' => $productId,
             'sku' => $productInfo->sku,
             'warehouse_id' => $warehouseId,

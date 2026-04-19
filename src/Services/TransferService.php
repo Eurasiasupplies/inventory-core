@@ -8,10 +8,11 @@ use InventoryCore\Exceptions\InsufficientStockException;
 
 class TransferService implements TransferInterface
 {
-    public function storeTransfer(int $productId, int $warehouseId, int $quantity)
+    public function storeTransfer(int $referenceId, int $productId, int $warehouseId, int $quantity)
     {
         $transferData = [
             'date' => now(),
+            'reference_no' => $referenceId,
             'warehouse_id' => $warehouseId,
             'to_warehouse_id' => 1,
             'quantity' => $quantity,
