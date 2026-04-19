@@ -70,6 +70,7 @@ class StockHistoryService implements StockHistoryInterface
             'reference_id'      => $data['reference_id'] ?? null,
             'reference_type'    => $type ?? null,
             'sku'               => $data['sku'],
+            'order_id'          => $data['order_id'] ?? null,
             'product_id'        => $data['product_id'],
             'warehouse_id'      => $data['warehouse_id'],
             'user_id'           => $data['user_id'] ?? 58,
