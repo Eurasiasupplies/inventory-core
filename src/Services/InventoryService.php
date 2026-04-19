@@ -3,6 +3,7 @@
 namespace InventoryCore\Services;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use InventoryCore\Contracts\InventoryInterface;
 use InventoryCore\Contracts\TransferInterface;
 use InventoryCore\Contracts\StockHistoryInterface;
@@ -135,6 +136,10 @@ class InventoryService implements InventoryInterface
                 ->where('warehouse_id', 1)
                 ->value('quantity') ?? 0;
 
+            $totalOldQuantity = DB::table('product_prices')
+                ->where('product_id', $productId)
+                ->sum('quantity');
+
             DB::table('product_prices')
                 ->where('warehouse_id', 1)
                 ->where('product_id', $productId)
@@ -143,7 +148,26 @@ class InventoryService implements InventoryInterface
                 ]);
 
             $this->stockHistory->storeOnlineHistory($referenceId, $productId, $quantity, $oldQuantity);
-            $this->stockEventService->publish($productId, $quantity, $oldQuantity);
+
+            $productInfo = DB::table('products as p')
+                ->where('p.id', $productId)
+                ->first();
+
+            $currentTotalQty = $totalOldQuantity - $quantity;
+
+            if ($currentTotalQty <= 5) {
+                DB::table('stock_notifications')->insert([
+                    'product_id' => $productId,
+                    'sku' => $productInfo->sku,
+                    "name" => $productInfo->name ?? '',
+                    'price' => $productInfo->wholesale_price,
+                    'old_quantity' => $totalOldQuantity,
+                    'stock_quantity' => $currentTotalQty,
+                    'created_at' => now(),
+                ]);
+                Log::info('Test Order to send Notification', ['referenceId' => $referenceId, 'productId' => $productId, 'quantity' => $currentTotalQty, 'oldQuantity' => $totalOldQuantity]);
+            }
+            Log::info('Test Order', ['referenceId' => $referenceId, 'productId' => $productId, 'quantity' => $currentTotalQty, 'oldQuantity' => $totalOldQuantity]);
 
             return true;
         });
