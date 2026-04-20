@@ -19,16 +19,6 @@ class StockHistoryService implements StockHistoryInterface
             )
             ->first();
 
-        $onlineWarehouse = DB::table('products')
-            ->join('product_prices', 'products.id', '=', 'product_prices.product_id')
-            ->where('products.id', $productId)
-            ->where('product_prices.warehouse_id', 1)
-            ->select(
-                'products.*',
-                'product_prices.quantity'
-            )
-            ->first();
-
         $data = [
             'reference_id' => $referenceId,
             'order_id' => $orderId,
@@ -43,22 +33,18 @@ class StockHistoryService implements StockHistoryInterface
             'online_quantity'   => $onlineQuantity,
         ];
 
+        $productOrder = DB::table('product_orders')
+            ->where('product_orders.order_id', $orderId)
+            ->first();
+
+        $productOrder->update(['online_transfer', 1]);
+
         $this->historyLog($data, $quantity, 'departure', 'transfer');
         $this->historyLog($data, $quantity, 'received', 'transfer');
     }
 
     public function historyLog($data, $quantity, $action, $type)
     {
-        $onlineWarehouse = DB::table('products')
-            ->join('product_prices', 'products.id', '=', 'product_prices.product_id')
-            ->where('products.id', $data['product_id'])
-            ->where('product_prices.warehouse_id', 1)
-            ->select(
-                'products.*',
-                'product_prices.quantity'
-            )
-            ->first();
-
         if ($action === 'received') {
             $data['warehouse_id'] = 1;
             $data['old_quantity'] = $data['online_quantity'];
