@@ -34,7 +34,7 @@ class StockHistoryService implements StockHistoryInterface
         ];
 
         $productOrder = DB::table('product_orders')
-            ->where('product_orders.order_id', $orderId)
+            ->where('product_orders.id', $orderId)
             ->first();
 
         $productOrder->update(['online_transfer', 1]);
