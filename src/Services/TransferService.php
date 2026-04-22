@@ -13,6 +13,7 @@ class TransferService implements TransferInterface
         $transferData = [
             'date' => now(),
             'reference_no' => $referenceId,
+            'order_id' => $referenceId,
             'warehouse_id' => $warehouseId,
             'to_warehouse_id' => 1,
             'quantity' => $quantity,
