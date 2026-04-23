@@ -4,7 +4,6 @@ namespace InventoryCore\Services;
 
 use Illuminate\Support\Facades\DB;
 use InventoryCore\Contracts\TransferInterface;
-use InventoryCore\Exceptions\InsufficientStockException;
 
 class TransferService implements TransferInterface
 {
