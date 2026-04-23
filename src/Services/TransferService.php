@@ -17,6 +17,7 @@ class TransferService implements TransferInterface
             'warehouse_id' => $warehouseId,
             'to_warehouse_id' => 1,
             'quantity' => $quantity,
+            'send_quantity' => $quantity,
             'transfer_status' => 2,
             'action' => 'complete',
             'online_transfer' => 1,
