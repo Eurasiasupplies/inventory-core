@@ -4,7 +4,7 @@ namespace InventoryCore\Services;
 
 use Illuminate\Support\Facades\DB;
 
-use Illuminate\Support\Facades\Lg;
+use Illuminate\Support\Facades\Log;
 use InventoryCore\Contracts\TransferInterface;
 
 class TransferService implements TransferInterface
