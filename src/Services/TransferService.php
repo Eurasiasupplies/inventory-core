@@ -3,6 +3,8 @@
 namespace InventoryCore\Services;
 
 use Illuminate\Support\Facades\DB;
+
+use Illuminate\Support\Facades\Lg;
 use InventoryCore\Contracts\TransferInterface;
 
 class TransferService implements TransferInterface
@@ -27,6 +29,7 @@ class TransferService implements TransferInterface
         ];
 
         $transfer = DB::table('transfers')->insertGetId($transferData);
+        Log::info('Transfer Log', [$transferData]);
 
         $transferItemData = [
             'transfer_id' => $transfer,
